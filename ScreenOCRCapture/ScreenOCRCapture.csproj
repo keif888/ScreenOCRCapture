@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>1.0.0.26</AssemblyVersion>
-    <FileVersion>1.0.0.26</FileVersion>
+    <AssemblyVersion>1.0.0.28</AssemblyVersion>
+    <FileVersion>1.0.0.28</FileVersion>
     <StartupObject>ScreenOCRCapture.Program</StartupObject>
   </PropertyGroup>
 
