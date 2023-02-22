@@ -289,7 +289,6 @@ namespace ScreenOCRCapture
         {
             imagesToReplace.Clear();
         }
+
     }
-
-
 }

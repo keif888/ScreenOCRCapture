@@ -53,6 +53,7 @@
             this.Controls.Add(this.pbCapture);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "CaptureForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "CaptureForm";
             ((System.ComponentModel.ISupportInitialize)(this.pbCapture)).EndInit();
             this.ResumeLayout(false);
