@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>AForge</AssemblyName>
+    <RootNamespace>AForge</RootNamespace>
+    <Copyright>AForge © 2012</Copyright>
+    <Product>AForge.Core</Product>
+    <AssemblyVersion>2.3.6.6</AssemblyVersion>
+    <FileVersion>2.3.6.6</FileVersion>
+    <Version>2.3.6</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+</Project>

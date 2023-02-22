@@ -42,15 +42,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="AForge">
-      <HintPath>..\..\AForge.Core\Imaging\bin\Debug\netcoreapp3.1\AForge.dll</HintPath>
-    </Reference>
-    <Reference Include="AForge.Imaging">
-      <HintPath>..\..\AForge.Core\Imaging\bin\Debug\netcoreapp3.1\AForge.Imaging.dll</HintPath>
-    </Reference>
-    <Reference Include="AForge.Math">
-      <HintPath>..\..\AForge.Core\Imaging\bin\Debug\netcoreapp3.1\AForge.Math.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\AForge.Core\Imaging\Imaging.csproj" />
+    <ProjectReference Include="..\AForge.Core\Math\Math.csproj" />
   </ItemGroup>
 
 </Project>
