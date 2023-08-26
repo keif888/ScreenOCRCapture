@@ -5,6 +5,7 @@ using AForge.Imaging;
 using AForge.Imaging.Filters;
 using System.Drawing.Imaging;
 using System.Text.RegularExpressions;
+using System.Text.Json;
 
 namespace ScreenOCRCapture
 {
@@ -14,7 +15,7 @@ namespace ScreenOCRCapture
         private List<TesseractOCR.Enums.Language> languages;
         private Bitmap imageToRemove;
         private Color colourToReplaceWith;
-        private List<Replacements> imagesToReplace = new List<Replacements>();
+        private List<Replacements>? imagesToReplace = new List<Replacements>();
         private System.Drawing.Point mdown = new System.Drawing.Point();
         public Rectangle captureArea = new Rectangle();
         private TesseractOCR.Enums.PageSegMode pageSegMode;
@@ -192,32 +193,35 @@ namespace ScreenOCRCapture
 
         private void executeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Bitmap bm = (Bitmap)pbCapturedImage.Image;
-            using (Bitmap greySource = AForge.Imaging.Filters.Grayscale.CommonAlgorithms.BT709.Apply(bm))
+            if (imagesToReplace != null)
             {
-                foreach (Replacements replacement in imagesToReplace)
+                Bitmap bm = (Bitmap)pbCapturedImage.Image;
+                using (Bitmap greySource = AForge.Imaging.Filters.Grayscale.CommonAlgorithms.BT709.Apply(bm))
                 {
-                    using (System.Drawing.Bitmap templateImage = new System.Drawing.Bitmap(replacement.ImageToRemove))
+                    foreach (Replacements replacement in imagesToReplace)
                     {
-                        using (Bitmap greyTemplate = AForge.Imaging.Filters.Grayscale.CommonAlgorithms.BT709.Apply(templateImage))
+                        using (System.Drawing.Bitmap templateImage = new System.Drawing.Bitmap(replacement.ImageToRemove))
                         {
-                            var tm = new ExhaustiveTemplateMatching(0.9f);
-                            TemplateMatch[] matchings = tm.ProcessImage(greySource, greyTemplate);
-
-                            // remove found matchings
-                            Rectangle rectangle = new Rectangle(0, 0, bm.Width, bm.Height);
-                            BitmapData data = bm.LockBits(rectangle, ImageLockMode.ReadWrite, PixelFormat.Format32bppRgb);
-
-                            foreach (TemplateMatch m in matchings)
+                            using (Bitmap greyTemplate = AForge.Imaging.Filters.Grayscale.CommonAlgorithms.BT709.Apply(templateImage))
                             {
-                                Drawing.FillRectangle(data, m.Rectangle, colourToReplaceWith);
+                                var tm = new ExhaustiveTemplateMatching(0.9f);
+                                TemplateMatch[] matchings = tm.ProcessImage(greySource, greyTemplate);
+
+                                // remove found matchings
+                                Rectangle rectangle = new Rectangle(0, 0, bm.Width, bm.Height);
+                                BitmapData data = bm.LockBits(rectangle, ImageLockMode.ReadWrite, PixelFormat.Format32bppRgb);
+
+                                foreach (TemplateMatch m in matchings)
+                                {
+                                    Drawing.FillRectangle(data, m.Rectangle, colourToReplaceWith);
+                                }
+                                bm.UnlockBits(data);
                             }
-                            bm.UnlockBits(data);
                         }
                     }
                 }
+                pbCapturedImage.Image = (System.Drawing.Image)bm;
             }
-            pbCapturedImage.Image = (System.Drawing.Image)bm;
         }
 
         private void imageToolStripMenuItem_Click(object sender, EventArgs e)
@@ -296,12 +300,26 @@ namespace ScreenOCRCapture
                 ColorToReplaceWith = colourToReplaceWith,
                 ImageToRemove = new Bitmap(imageToRemove)
             };
-            imagesToReplace.Add(replacement);
+            if (imagesToReplace != null)
+            {
+                imagesToReplace.Add(replacement);
+            }
+            else
+            {
+                imagesToReplace = new List<Replacements> { replacement };
+            }
         }
 
         private void clearListToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            imagesToReplace.Clear();
+            if (imagesToReplace != null)
+            {
+                imagesToReplace.Clear();
+            }
+            else
+            {
+                imagesToReplace = new List<Replacements>();
+            }
         }
 
 
@@ -393,5 +411,25 @@ namespace ScreenOCRCapture
             }
         }
 
+        private void loadCleanupToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                imagesToReplace?.Clear();
+                string fileName = openFileDialog1.FileName;
+                var replacements = File.ReadAllText(fileName);
+                imagesToReplace = JsonSerializer.Deserialize<List<Replacements>>(replacements);
+            }
+        }
+
+        private void saveCleanupToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                string fileName = saveFileDialog1.FileName;
+                string jsonString = JsonSerializer.Serialize(imagesToReplace);
+                File.WriteAllText(fileName, jsonString);
+            }
+        }
     }
 }
