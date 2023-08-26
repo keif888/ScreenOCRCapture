@@ -11,7 +11,7 @@ namespace ScreenOCRCapture
     public partial class MainForm : Form
     {
         private CaptureForm cf;
-        private TesseractOCR.Enums.Language language;
+        private List<TesseractOCR.Enums.Language> languages;
         private Bitmap imageToRemove;
         private Color colourToReplaceWith;
         private List<Replacements> imagesToReplace = new List<Replacements>();
@@ -21,7 +21,8 @@ namespace ScreenOCRCapture
         {
             InitializeComponent();
             cf = new CaptureForm();
-            language = TesseractOCR.Enums.Language.English;
+            languages = new List<TesseractOCR.Enums.Language>();
+            languages.Add(TesseractOCR.Enums.Language.English);
             imageToRemove = new Bitmap(1, 1);
             colourToReplaceWith = Color.White;
         }
@@ -128,7 +129,7 @@ namespace ScreenOCRCapture
 
             // OCR the rectangle's text.
             //using var tEngine = new Engine("./tessdata", "eng+chi_sim+jpn+kor", TesseractOCR.Enums.EngineMode.Default);
-            using var tEngine = new Engine("./tessdata", language, TesseractOCR.Enums.EngineMode.Default);
+            using var tEngine = new Engine("./tessdata", languages, TesseractOCR.Enums.EngineMode.Default);
             using var img = TesseractOCR.Pix.Image.LoadFromMemory(ImageToByte(bm));
             using var page = tEngine.Process(img, TesseractOCR.Enums.PageSegMode.SparseTextOsd);
 
@@ -144,36 +145,37 @@ namespace ScreenOCRCapture
             tbCapturedText.Text = result.ToString();
         }
 
+        private void resetLanguages()
+        {
+            languages.Clear();
+            if (englishToolStripMenuItem.Checked)
+                languages.Add(TesseractOCR.Enums.Language.English);
+            if (chineseToolStripMenuItem.Checked)
+                languages.Add(TesseractOCR.Enums.Language.ChineseSimplified);
+            if (japaneseToolStripMenuItem.Checked)
+                languages.Add(TesseractOCR.Enums.Language.Japanese);
+            if (koreanToolStripMenuItem.Checked)
+                languages.Add(TesseractOCR.Enums.Language.Korean);
+        }
+
         private void englishToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            chineseToolStripMenuItem.Checked = false;
-            japaneseToolStripMenuItem.Checked = false;
-            koreanToolStripMenuItem.Checked = false;
-            language = TesseractOCR.Enums.Language.English;
+            resetLanguages();
         }
 
         private void chineseToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            englishToolStripMenuItem.Checked = false;
-            japaneseToolStripMenuItem.Checked = false;
-            koreanToolStripMenuItem.Checked = false;
-            language = TesseractOCR.Enums.Language.ChineseSimplified;
+            resetLanguages();
         }
 
         private void koreanToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            englishToolStripMenuItem.Checked = false;
-            japaneseToolStripMenuItem.Checked = false;
-            chineseToolStripMenuItem.Checked = false;
-            language = TesseractOCR.Enums.Language.Korean;
+            resetLanguages();
         }
 
         private void japaneseToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            englishToolStripMenuItem.Checked = false;
-            koreanToolStripMenuItem.Checked = false;
-            chineseToolStripMenuItem.Checked = false;
-            language = TesseractOCR.Enums.Language.Japanese;
+            resetLanguages();
         }
 
         private void executeToolStripMenuItem_Click(object sender, EventArgs e)
