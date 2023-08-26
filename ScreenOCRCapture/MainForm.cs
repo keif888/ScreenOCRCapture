@@ -17,6 +17,8 @@ namespace ScreenOCRCapture
         private List<Replacements> imagesToReplace = new List<Replacements>();
         private System.Drawing.Point mdown = new System.Drawing.Point();
         public Rectangle captureArea = new Rectangle();
+        private TesseractOCR.Enums.PageSegMode pageSegMode;
+
         public MainForm()
         {
             InitializeComponent();
@@ -25,6 +27,7 @@ namespace ScreenOCRCapture
             languages.Add(TesseractOCR.Enums.Language.English);
             imageToRemove = new Bitmap(1, 1);
             colourToReplaceWith = Color.White;
+            pageSegMode = TesseractOCR.Enums.PageSegMode.SparseTextOsd;
         }
 
         /// <summary>
@@ -131,16 +134,25 @@ namespace ScreenOCRCapture
             //using var tEngine = new Engine("./tessdata", "eng+chi_sim+jpn+kor", TesseractOCR.Enums.EngineMode.Default);
             using var tEngine = new Engine("./tessdata", languages, TesseractOCR.Enums.EngineMode.Default);
             using var img = TesseractOCR.Pix.Image.LoadFromMemory(ImageToByte(bm));
-            using var page = tEngine.Process(img, TesseractOCR.Enums.PageSegMode.SparseTextOsd);
+            using var page = tEngine.Process(img, pageSegMode);
 
             StringBuilder result = new StringBuilder();
             result.Append(tbCapturedText.Text);
-
+            int Length = 0;
             foreach (var block in page.Layout)
             {
-                int Length = block.Text.ReplaceLineEndings().Trim().Length;
-                if (Length != 0)
-                    result.AppendLine(block.Text.ReplaceLineEndings());
+                if (stripLineEndingsToolStripMenuItem.Checked)
+                {
+                    Length = block.Text.ReplaceLineEndings(String.Empty).Trim().Length;
+                    if (Length != 0)
+                        result.AppendLine(block.Text.ReplaceLineEndings(String.Empty));
+                }
+                else
+                {
+                    Length = block.Text.ReplaceLineEndings().Trim().Length;
+                    if (Length != 0)
+                        result.AppendLine(block.Text.ReplaceLineEndings());
+                }
             }
             tbCapturedText.Text = result.ToString();
         }
@@ -148,14 +160,14 @@ namespace ScreenOCRCapture
         private void resetLanguages()
         {
             languages.Clear();
-            if (englishToolStripMenuItem.Checked)
-                languages.Add(TesseractOCR.Enums.Language.English);
             if (chineseToolStripMenuItem.Checked)
                 languages.Add(TesseractOCR.Enums.Language.ChineseSimplified);
             if (japaneseToolStripMenuItem.Checked)
                 languages.Add(TesseractOCR.Enums.Language.Japanese);
             if (koreanToolStripMenuItem.Checked)
                 languages.Add(TesseractOCR.Enums.Language.Korean);
+            if (englishToolStripMenuItem.Checked)
+                languages.Add(TesseractOCR.Enums.Language.English);
         }
 
         private void englishToolStripMenuItem_Click(object sender, EventArgs e)
@@ -290,6 +302,95 @@ namespace ScreenOCRCapture
         private void clearListToolStripMenuItem_Click(object sender, EventArgs e)
         {
             imagesToReplace.Clear();
+        }
+
+
+        private void pageSegModeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            oSDOnlyToolStripMenuItem.Checked = false;
+            autoPageWithOSDToolStripMenuItem.Checked = false;
+            autoPageToolStripMenuItem.Checked = false;
+            autoNoOSDOCRToolStripMenuItem.Checked = false;
+            singleColumnToolStripMenuItem.Checked = false;
+            singleBlockVertToolStripMenuItem.Checked = false;
+            singleBlockToolStripMenuItem.Checked = false;
+            singleLineToolStripMenuItem.Checked = false;
+            singleWordToolStripMenuItem.Checked = false;
+            wordInCircleToolStripMenuItem.Checked = false;
+            singleCharacterToolStripMenuItem.Checked = false;
+            sparseTextToolStripMenuItem.Checked = false;
+            sparseTextWithOSDToolStripMenuItem.Checked = false;
+            rawLineToolStripMenuItem.Checked = false;
+            if (sender == oSDOnlyToolStripMenuItem)
+            {
+                oSDOnlyToolStripMenuItem.Checked = true;
+                pageSegMode = TesseractOCR.Enums.PageSegMode.OsdOnly;
+            }
+            else if (sender == autoPageWithOSDToolStripMenuItem)
+            {
+                autoPageWithOSDToolStripMenuItem.Checked = true;
+                pageSegMode = TesseractOCR.Enums.PageSegMode.AutoOsd;
+            }
+            else if (sender == autoPageToolStripMenuItem)
+            {
+                autoPageToolStripMenuItem.Checked = true;
+                pageSegMode = TesseractOCR.Enums.PageSegMode.AutoOnly;
+            }
+            else if (sender == autoNoOSDOCRToolStripMenuItem)
+            {
+                autoNoOSDOCRToolStripMenuItem.Checked = true;
+                pageSegMode = TesseractOCR.Enums.PageSegMode.Auto;
+            }
+            else if (sender == singleColumnToolStripMenuItem)
+            {
+                singleColumnToolStripMenuItem.Checked = true;
+                pageSegMode = TesseractOCR.Enums.PageSegMode.SingleColumn;
+            }
+            else if (sender == singleBlockVertToolStripMenuItem)
+            {
+                singleBlockVertToolStripMenuItem.Checked = true;
+                pageSegMode = TesseractOCR.Enums.PageSegMode.SingleBlockVertText;
+            }
+            else if (sender == singleBlockToolStripMenuItem)
+            {
+                singleBlockToolStripMenuItem.Checked = true;
+                pageSegMode = TesseractOCR.Enums.PageSegMode.SingleBlock;
+            }
+            else if (sender == singleLineToolStripMenuItem)
+            {
+                singleLineToolStripMenuItem.Checked = true;
+                pageSegMode = TesseractOCR.Enums.PageSegMode.SingleLine;
+            }
+            else if (sender == singleWordToolStripMenuItem)
+            {
+                singleWordToolStripMenuItem.Checked = true;
+                pageSegMode = TesseractOCR.Enums.PageSegMode.SingleWord;
+            }
+            else if (sender == wordInCircleToolStripMenuItem)
+            {
+                wordInCircleToolStripMenuItem.Checked = true;
+                pageSegMode = TesseractOCR.Enums.PageSegMode.CircleWord;
+            }
+            else if (sender == singleCharacterToolStripMenuItem)
+            {
+                singleCharacterToolStripMenuItem.Checked = true;
+                pageSegMode = TesseractOCR.Enums.PageSegMode.SingleChar;
+            }
+            else if (sender == sparseTextToolStripMenuItem)
+            {
+                sparseTextToolStripMenuItem.Checked = true;
+                pageSegMode = TesseractOCR.Enums.PageSegMode.SparseText;
+            }
+            else if (sender == sparseTextWithOSDToolStripMenuItem)
+            {
+                sparseTextWithOSDToolStripMenuItem.Checked = true;
+                pageSegMode = TesseractOCR.Enums.PageSegMode.SparseTextOsd;
+            }
+            else if (sender == rawLineToolStripMenuItem)
+            {
+                rawLineToolStripMenuItem.Checked = true;
+                pageSegMode = TesseractOCR.Enums.PageSegMode.RawLine;
+            }
         }
 
     }
