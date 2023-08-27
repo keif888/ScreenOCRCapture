@@ -6,8 +6,8 @@
     <RootNamespace>AForge</RootNamespace>
     <Copyright>AForge © 2012</Copyright>
     <Product>AForge.Core</Product>
-    <AssemblyVersion>2.3.6.14</AssemblyVersion>
-    <FileVersion>2.3.6.14</FileVersion>
+    <AssemblyVersion>2.3.6.16</AssemblyVersion>
+    <FileVersion>2.3.6.16</FileVersion>
     <Version>2.3.6</Version>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>

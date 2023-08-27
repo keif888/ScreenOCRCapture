@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>1.0.0.53</AssemblyVersion>
-    <FileVersion>1.0.0.53</FileVersion>
+    <AssemblyVersion>1.0.0.55</AssemblyVersion>
+    <FileVersion>1.0.0.55</FileVersion>
     <StartupObject>ScreenOCRCapture.Program</StartupObject>
   </PropertyGroup>
 
@@ -44,6 +44,21 @@
   <ItemGroup>
     <ProjectReference Include="..\AForge.Core\Imaging\Imaging.csproj" />
     <ProjectReference Include="..\AForge.Core\Math\Math.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 
 </Project>
