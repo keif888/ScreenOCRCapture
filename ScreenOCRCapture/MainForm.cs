@@ -6,6 +6,8 @@ using AForge.Imaging.Filters;
 using System.Drawing.Imaging;
 using System.Text.RegularExpressions;
 using System.Text.Json;
+using static System.Windows.Forms.DataFormats;
+using System.Text.Json.Nodes;
 
 namespace ScreenOCRCapture
 {
@@ -213,7 +215,7 @@ namespace ScreenOCRCapture
 
                                 foreach (TemplateMatch m in matchings)
                                 {
-                                    Drawing.FillRectangle(data, m.Rectangle, colourToReplaceWith);
+                                    Drawing.FillRectangle(data, m.Rectangle, replacement.ColorToReplaceWith);
                                 }
                                 bm.UnlockBits(data);
                             }
@@ -417,19 +419,57 @@ namespace ScreenOCRCapture
             {
                 imagesToReplace?.Clear();
                 string fileName = openFileDialog1.FileName;
-                var replacements = File.ReadAllText(fileName);
-                imagesToReplace = JsonSerializer.Deserialize<List<Replacements>>(replacements);
+                var jsonString = File.ReadAllText(fileName);
+                List<ReplacementsJson>? replacementsJson = JsonSerializer.Deserialize<List<ReplacementsJson>>(jsonString);
+                if (replacementsJson != null)
+                {
+                    if (imagesToReplace == null)
+                    {
+                        imagesToReplace = new List<Replacements>();
+                    }
+                    else
+                    {
+                        imagesToReplace.Clear();
+                    }
+                    foreach (ReplacementsJson replacementJson in replacementsJson)
+                    {
+                        Replacements imageReplacement = new Replacements();
+                        imageReplacement.ColorToReplaceWith = Color.FromArgb(replacementJson.colorToReplaceWith.A, replacementJson.colorToReplaceWith.R, replacementJson.colorToReplaceWith.G, replacementJson.colorToReplaceWith.B);
+                        using (MemoryStream ms = new(Convert.FromBase64String(replacementJson.bitmapBase64)))
+                        {
+                            imageReplacement.ImageToRemove = new Bitmap(ms);
+                        }
+                        imagesToReplace.Add(imageReplacement);
+                    }
+                }
             }
         }
 
         private void saveCleanupToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
-            {
-                string fileName = saveFileDialog1.FileName;
-                string jsonString = JsonSerializer.Serialize(imagesToReplace);
-                File.WriteAllText(fileName, jsonString);
-            }
+            if (imagesToReplace != null)
+                if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    string fileName = saveFileDialog1.FileName;
+                    List<ReplacementsJson> replacementsJson = new List<ReplacementsJson>();
+                    foreach (Replacements replacement in imagesToReplace)
+                    {
+                        ReplacementsJson replacementJson = new ReplacementsJson();
+                        replacementJson.colorToReplaceWith.A = replacement.ColorToReplaceWith.A;
+                        replacementJson.colorToReplaceWith.R = replacement.ColorToReplaceWith.R;
+                        replacementJson.colorToReplaceWith.G = replacement.ColorToReplaceWith.G;
+                        replacementJson.colorToReplaceWith.B = replacement.ColorToReplaceWith.B;
+                        using (MemoryStream ms = new())
+                        {
+                            replacement.ImageToRemove.Save(ms, ImageFormat.Bmp);
+                            replacementJson.bitmapBase64 = Convert.ToBase64String(ms.ToArray());
+                        }
+                        replacementsJson.Add(replacementJson);
+                    }
+                    var options = new JsonSerializerOptions { WriteIndented = true };
+                    string jsonString = JsonSerializer.Serialize(replacementsJson,options);
+                    File.WriteAllText(fileName, jsonString);
+                }
         }
     }
 }
